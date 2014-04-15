@@ -22,6 +22,33 @@ module.exports = function (options) {
 
     function widget_fn() {
         fis.scaffold.download('pc-scaffold-widget', dist, {}, function () {
+            var files = fis.util.find(dist);
+
+            fis.util.map(files, function (index, filepath) {
+
+                if (filepath) {
+                    
+                    var name = require('path').basename(dist);
+                    
+                    //replace rel path
+                    var content = fis.util.read(filepath, {
+                        encoding: 'utf8'
+                    });
+
+                    fis.util.write(filepath, content.replace(/widget\.(js|css|tpl)/g, function (match, ext) {
+                        match = name + '.' + ext;
+                        return match;
+                    }));
+
+                    var m = filepath.match(/widget\.(js|css|tpl)$/);
+                    
+                    if (m) {
+                        fis.util.copy(filepath, dist + '/' + name + '.' + m[1]);
+                        fis.util.del(filepath);
+                    }
+                }
+            });
+
             fis.scaffold.prompt(dist);
         });
     }
