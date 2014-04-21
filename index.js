@@ -2,7 +2,6 @@
  * fis.baidu.com
  */
 
-var nopt = require('nopt');
 var path = require('path');
 
 module.exports = function (options) {
@@ -12,18 +11,24 @@ module.exports = function (options) {
 
     function module_fn() {
         if (!options.withPlugin) {
-            scf_opts.exclude = /package\.json|\/plugin\/.*|page\/layout.tpl/i;
+            scf_opts.exclude = /package\.json|\/plugin\/.*|page\/layout.tpl|README.md/i;
         }
 
-        fis.scaffold.download('pc-scaffold-module', dist, scf_opts, function () {
+        fis.scaffold.download('pc-scaffold-module', dist, scf_opts, function (paths) {
+            if (options.withPlugin) {
+                fis.scaffold.mv(path.resolve(dist, 'pc-plugin'), path.resolve(dist, 'plugin'));
+            } else {
+                fis.util.del(path.resolve(dist, 'pc-plugin'));
+            }
+            fis.scaffold.mv(path.resolve(dist, 'pc-scaffold-module'), dist);
             fis.scaffold.prompt(dist);
         });
     }
 
     function widget_fn() {
-        fis.scaffold.download('pc-scaffold-widget', dist, {}, function () {
+        fis.scaffold.download('pc-scaffold-widget', dist, {}, function (paths) {
+            fis.scaffold.mv(path.resolve(dist, 'pc-scaffold-widget'), dist);
             var files = fis.util.find(dist);
-
             fis.util.map(files, function (index, filepath) {
 
                 if (filepath) {
@@ -43,8 +48,7 @@ module.exports = function (options) {
                     var m = filepath.match(/widget\.(js|css|tpl)$/);
                     
                     if (m) {
-                        fis.util.copy(filepath, dist + '/' + name + '.' + m[1]);
-                        fis.util.del(filepath);
+                        fis.scaffold.mv(filepath, path.resolve(dist, name + '.' + m[1]));
                     }
                 }
             });
