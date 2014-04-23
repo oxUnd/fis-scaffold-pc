@@ -9,19 +9,37 @@ module.exports = function (options) {
 
     var dist = options.dir;
 
+    function replace_delimiter_(string) {
+        //if default, not replace
+        if (options.ld == '{%')  {
+            return string;
+        }
+        return string.replace(
+            new RegExp('\\{%|%\\}', 'g'),
+            function (m) {
+                if (m == '{%') m = options.ld;
+                else if (m == '%}') m = options.rd;
+                return m;
+            });
+    }
+
     function module_fn() {
         if (!options.withPlugin) {
             scf_opts.exclude = /package\.json|\/plugin\/.*|page\/layout.tpl|README.md/i;
+            scf_opts.deps = false; //don't download  `pc-plugin`
         }
 
         fis.scaffold.download('pc-scaffold-module', dist, scf_opts, function (paths) {
             if (options.withPlugin) {
                 fis.scaffold.mv(path.resolve(dist, 'pc-plugin'), path.resolve(dist, 'plugin'));
-            } else {
-                fis.util.del(path.resolve(dist, 'pc-plugin'));
             }
             fis.scaffold.mv(path.resolve(dist, 'pc-scaffold-module'), dist);
-            fis.scaffold.prompt(dist);
+            fis.scaffold.prompt(dist, function () {
+                var files = fis.util.find(dist, /.*\.tpl$/i);
+                files.forEach(function (filepath) {
+                    fis.util.write(filepath, replace_delimiter_(fis.util.read(filepath, {encoding: 'utf-8'})));
+                });
+            });
         });
     }
 
@@ -40,10 +58,16 @@ module.exports = function (options) {
                         encoding: 'utf8'
                     });
 
-                    fis.util.write(filepath, content.replace(/widget\.(js|css|tpl)/g, function (match, ext) {
-                        match = name + '.' + ext;
-                        return match;
-                    }));
+                    fis.util.write(
+                        filepath, 
+                        replace_delimiter_(
+                            content
+                                .replace(/widget\.(js|css|tpl)/g, function (match, ext) {
+                                    match = name + '.' + ext;
+                                    return match;
+                                })
+                        )
+                    );
 
                     var m = filepath.match(/widget\.(js|css|tpl)$/);
                     
@@ -62,3 +86,11 @@ module.exports = function (options) {
         widget: widget_fn
     }
 };
+
+module.exports.command = function (commander) {
+    //add option
+    //add command
+    commander
+        .option('--ld <left_delimiter>', 'smarty left_delimiter', String, '{%')
+        .option('--rd <right_delimiter>', 'smarty right_delimiter', String, '%}');
+}
