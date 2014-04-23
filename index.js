@@ -104,8 +104,8 @@ module.exports.command = function (commander) {
             'module -d ./to/directory/common --with-plugin',
             'module -d ./to/directory/other --ld \'<%\' --rd \'%>\'',
             'widget -d ./widget/box',
-            'modjs //download \'modjs\''
-        ];
+            'modjs ' + '//just download \'modjs\''.grey
+        ];  
         var sp = '\n    ' + '$ ' + pragram + ' ' + command + ' ' ;
         console.log('  Examples:');
         console.log(sp + egs.join(sp));
