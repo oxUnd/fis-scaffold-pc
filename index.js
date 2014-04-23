@@ -97,14 +97,14 @@ module.exports.command = function (commander) {
     commander
         .option('--ld <left_delimiter>', 'smarty left_delimiter', String, '{%')
         .option('--rd <right_delimiter>', 'smarty right_delimiter', String, '%}');
-        
+
     commander.on('--help', function () {
         var egs = [
             'module -d ./to/directory/other',
             'module -d ./to/directory/common --with-plugin',
             'module -d ./to/directory/other --ld \'<%\' --rd \'%>\'',
             'widget -d ./widget/box',
-            'modjs //download `modjs`'
+            'modjs //download \'modjs\''
         ];
         var sp = '\n    ' + '$ ' + pragram + ' ' + command + ' ' ;
         console.log('  Examples:');
