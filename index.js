@@ -90,7 +90,24 @@ module.exports = function (options) {
 module.exports.command = function (commander) {
     //add option
     //add command
+    
+    var pragram = path.basename(process.argv[1]);
+    var command = commander._name;
+
     commander
         .option('--ld <left_delimiter>', 'smarty left_delimiter', String, '{%')
         .option('--rd <right_delimiter>', 'smarty right_delimiter', String, '%}');
+        
+    commander.on('--help', function () {
+        var egs = [
+            'module -d ./to/directory/other',
+            'module -d ./to/directory/common --with-plugin',
+            'module -d ./to/directory/other --ld \'<%\' --rd \'%>\'',
+            'widget -d ./widget/box',
+            'modjs //download `modjs`'
+        ];
+        var sp = '\n    ' + '$ ' + pragram + ' ' + command + ' ' ;
+        console.log('  Examples:');
+        console.log(sp + egs.join(sp));
+    });
 }
